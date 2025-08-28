@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+
+#define MAX_SIZE 100
+
+
+int stack[MAX_SIZE];
+int top = -1;
+
+
+int isEmpty() {
+    return top == -1;
+}
+
+
+int isFull() {
+    return top == MAX_SIZE - 1;
+}
+
+
+void push(int value) {
+    if (isFull()) {
+        printf("Stack overflow! Cannot push %d\n", value);
+        return;
+    }
+    top++;
+    stack[top] = value;
+}
+
+
+int pop() {
+    if (isEmpty()) {
+        printf("Stack underflow! Cannot pop\n");
+        return -1;
+    }
+    int value = stack[top];
+    top--;
+    return value;
+}
+
+
+int evaluatePostfix(char* expression) {
+    int i = 0;
+    char token;
+    int operand1, operand2, result;
+    
+    while (expression[i] != '\0') {
+        token = expression[i];
+        
+        
+        if (token == ' ') {
+            i++;
+            continue;
+        }
+        
+       
+        if (isdigit(token)) {
+            int num = 0;
+            
+            while (isdigit(expression[i])) {
+                num = num * 10 + (expression[i] - '0');
+                i++;
+            }
+            push(num);
+            continue;
+        }
+        
+        
+        switch(token) {
+            case '+':
+                operand2 = pop();
+                operand1 = pop();
+                result = operand1 + operand2;
+                push(result);
+                break;
+                
+            case '-':
+                operand2 = pop();
+                operand1 = pop();
+                result = operand1 - operand2;
+                push(result);
+                break;
+                
+            case '*':
+                operand2 = pop();
+                operand1 = pop();
+                result = operand1 * operand2;
+                push(result);
+                break;
+                
+            case '/':
+                operand2 = pop();
+                if (operand2 == 0) {
+                    printf("Error: Division by zero\n");
+                    return -1;
+                }
+                operand1 = pop();
+                result = operand1 / operand2;
+                push(result);
+                break;
+                
+            case '^':
+                operand2 = pop();
+                operand1 = pop();
+                result = (int)pow(operand1, operand2);
+                push(result);
+                break;
+                
+            default:
+                printf("Error: Invalid character '%c' in expression\n", token);
+                return -1;
+        }
+        i++;
+    }
+    
+    if (top != 0) {
+        printf("Error: Invalid postfix expression\n");
+        return -1;
+    }
+    
+    return pop();
+}
+
+int main() {
+    char expression[MAX_SIZE];
+    int result;
+    
+    printf("Postfix Expression Evaluator\n");
+    printf("Supported operators: +, -, *, /, ^\n");
+    printf("Enter a postfix expression: ");
+    fgets(expression, MAX_SIZE, stdin);
+    
+    if (expression[strlen(expression)-1] == '\n') {
+        expression[strlen(expression)-1] = '\0';
+    }
+    
+    result = evaluatePostfix(expression);
+    
+    if (result != -1) {
+        printf("Result: %d\n", result);
+    }
+    
+    return 0;
+}
